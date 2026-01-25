@@ -1,5 +1,8 @@
-import express from 'express';
+const express = require('express');
+const checkUser = require('../middleware/portfolioMiddleware.js');
 
 const router = express.Router();
 
-export default router;
+router.use(checkUser);
+
+module.exports = router;

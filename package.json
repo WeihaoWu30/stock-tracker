@@ -3,6 +3,7 @@
     "concurrently": "^9.2.0"
   },
   "dependencies": {
-    "bcrypt": "^6.0.0"
+    "bcrypt": "^6.0.0",
+    "passport-google-oauth20": "^2.0.0"
   }
 }

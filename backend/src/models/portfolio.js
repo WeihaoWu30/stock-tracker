@@ -1,20 +1,15 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose');
 
-const holdingSchema = new mongoose.Schema({
-    userID:{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
-    stocks : [
-        {
-            name: {type: String},
-            shares: {type: Number, required: true},
-            price: {type: Number},
-        }
-    ],
-    balance:{
-        current,
-        netChange,
-        capitalGain
-    }
-});
+const portfolioSchema = new mongoose.Schema({
+   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+   assets: [
+      {
+         symbol: { type: String, required: true },
+         quantity: { type: Number, required: true, default: 0 },
+         avgPrice: { type: Number, required: true },
+      }
+   ],
+   cashBalance: { type: Number, default: 0 }
+}, { timestamps: true });
 
-const Holding = mongoose.model('portfolio', holdingSchema);
-export default Holding;
+module.exports = mongoose.model('Portfolio', portfolioSchema);

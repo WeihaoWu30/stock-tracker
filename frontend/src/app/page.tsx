@@ -1,20 +1,33 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
    return (
-      <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-         <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start text-center sm:text-left">
-            <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl">
-               Stock Tracker
+      <div className="min-h-screen bg-black text-white relative overflow-hidden font-sans">
+         {/* Background Gradients */}
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+         {/* Hero Section */}
+         <main className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center z-10 relative">
+            <div className="inline-flex items-center px-3 py-1 rounded-full border border-white/10 bg-white/5 mb-8 animate-fade-in">
+               <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+               <span className="text-sm font-medium text-gray-300">Live Market Data</span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 animate-slide-up">
+               Track Your Wealth <br />
+               <span className="text-gradient">In Real Time</span>
             </h1>
-            <p className="max-w-[600px] text-zinc-500 md:text-xl dark:text-zinc-400">
-               Track your portfolio, analyze trends, and make informed decisions with ease.
+
+            <p className="max-w-2xl text-lg text-gray-400 mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+               Monitor your portfolio, analyze trends, and make data-driven decisions with our powerful stock tracking platform.
             </p>
 
-            <div className="flex gap-4 items-center flex-col sm:flex-row">
+            <div className="flex gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
                <Link
                   href="/Login"
-                  className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+                  className="px-8 py-3 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-colors"
                >
                   Get Started
                </Link>
@@ -22,17 +35,32 @@ export default function Home() {
                   href="https://github.com/WeihaoWu30/stock-tracker"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+                  className="px-8 py-3 border border-white/20 hover:bg-white/10 rounded-full transition-all"
                >
-                  View on GitHub
+                  View Code
                </a>
             </div>
          </main>
 
-         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-               © {new Date().getFullYear()} Stock Tracker. All rights reserved.
-            </p>
+         {/* Features Grid */}
+         <section className="max-w-6xl mx-auto px-4 py-20 grid md:grid-cols-3 gap-6 z-10 relative">
+            {[
+               { title: "Real-time Data", desc: "Live price updates from major exchanges worldwide.", icon: "ShowChart" },
+               { title: "Portfolio Analytics", desc: "Deep dive into your asset allocation and performance.", icon: "PieChart" },
+               { title: "Smart Alerts", desc: "Get notified when stocks hit your target price.", icon: "Notifications" }
+            ].map((feature, i) => (
+               <div key={i} className="glass-card p-6 rounded-xl hover:bg-white/15 transition-all cursor-default">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg mb-4 flex items-center justify-center text-xl font-bold">
+                     {i + 1}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                  <p className="text-gray-400">{feature.desc}</p>
+               </div>
+            ))}
+         </section>
+
+         <footer className="py-8 text-center text-gray-500 text-sm border-t border-white/10">
+            <p>© {new Date().getFullYear()} Stock Tracker. Built with Next.js & Tailwind.</p>
          </footer>
       </div>
    );

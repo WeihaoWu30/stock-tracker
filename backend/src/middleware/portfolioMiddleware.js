@@ -1,14 +1,14 @@
 const User = require("../models/user");
-
-const checkUser = async(req, res, next) => {
-    try{
-        const user = await User.findOne({userID: req.userID});
-        if (!user) res.status(404).json({message: "User not Found"});
-        next()
-    }
-    catch(e){
-        return res;
-    }
+const checkUser = (req, res, next) => {
+   try {
+      if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+      next();
+   }
+   catch (e) {
+      console.error(e);
+      return res.status(500).json({ message: "Internal Server Error" });
+   }
 }
+
 
 module.exports = checkUser;

@@ -19,6 +19,14 @@ const userSchema = new mongoose.Schema({
       //   required: true,
       //unique: true,
    },
+   googleId: {
+      type: String,
+      unique: true,
+      sparse: true // Allows null/undefined for non-Google users
+   },
+   photo: {
+      type: String
+   }
 });
 
 userSchema.pre("save", async function (next) {

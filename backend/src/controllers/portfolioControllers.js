@@ -20,6 +20,21 @@ const getPrice = async (symbol) => {
    }
 }
 
+// Controller: Get Quote
+const getQuote = async (req, res) => {
+   try {
+      const { symbol } = req.query;
+      if (!symbol) return res.status(400).json({ message: "Symbol is required" });
+
+      const data = await getPrice(symbol);
+      if (!data) return res.status(404).json({ message: "Stock not found" });
+
+      res.json(data);
+   } catch (err) {
+      res.status(500).json({ error: err.message });
+   }
+}
+
 // Helper: Get Logo
 const getLogo = async (symbol, country) => {
    const logo = {
@@ -78,7 +93,12 @@ const getUser = async (req, res) => {
 
 const addShares = async (req, res) => {
    try {
-      const { symbol, quantity, price } = req.body;
+      const { symbol, quantity } = req.body;
+      const marketData = await getPrice(symbol);
+      const price = marketData && marketData.close ? parseFloat(marketData.close) : null;
+
+      if (!price) return res.status(400).json({ message: "Could not fetch current price for symbol" });
+
       if (!req.user) return res.status(401).json({ message: "Unauthorized" });
       const userId = req.user._id;
 
@@ -167,6 +187,8 @@ const deleteAsset = async (req, res) => {
 
 module.exports = {
    getUser,
+   getPrice,
+   getQuote,
    addShares,
    sellShares,
    deleteAsset

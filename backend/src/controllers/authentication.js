@@ -26,7 +26,6 @@ const loginSuccess = (req, res) => {
    if (!req.user) {
       return res.redirect("/");
    }
-   // Redirect to frontend dashboard or home
    res.redirect(process.env.CLIENT_URL || "http://localhost:3000");
 }
 
@@ -35,5 +34,13 @@ const loginFailure = (req, res) => {
    res.redirect(`${process.env.CLIENT_URL || "http://localhost:3000"}/login?error=failed`);
 }
 
+const getUserProfile = (req, res) => {
+   if (!req.user) {
+      return res.status(404).json({ message: "No user found" });
+   }
+   else {
+      res.json(req.user);
+   }
+}
 
-module.exports = { loginFailure, loginSuccess };
+module.exports = { loginFailure, loginSuccess, getUserProfile };

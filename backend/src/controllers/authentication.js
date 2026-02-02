@@ -43,4 +43,11 @@ const getUserProfile = (req, res) => {
    }
 }
 
-module.exports = { loginFailure, loginSuccess, getUserProfile };
+const logout = (req, res) => {
+   req.logout((err) => {
+      if (err) return res.status(500).json({ message: "Logout failed" });
+      res.json({ message: "Logout successful" });
+   });
+}
+
+module.exports = { loginFailure, loginSuccess, getUserProfile, logout };

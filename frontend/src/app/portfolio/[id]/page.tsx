@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import StockChart from '@/components/StockChart';
+import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import api from '@/utils/api';
 import Link from 'next/link';
@@ -10,6 +12,8 @@ import Link from 'next/link';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function PortfolioPage() {
+
+   const router = useRouter();
 
    type Holding = {
       symbol: string,
@@ -24,38 +28,42 @@ export default function PortfolioPage() {
 
    const [holdings, setHoldings] = useState<Holding[]>([]);
 
-   useEffect(() => {
-      const fetchPortfolio = async () => {
-         try {
-            const response = await api.get("api/portfolio/profile");
-            const { assets, cashBalance } = response.data;
+   const params = useParams();
+   const id = params.id as string;
 
-            const reformatHoldings = assets.map((asset: any) => {
-               const changePercent = asset.avgPrice > 0 ? ((asset.currentPrice - asset.avgPrice) / asset.avgPrice * 100) : 0;
-               return {
-                  symbol: asset.symbol,
-                  name: asset.symbol,
-                  shares: asset.quantity,
-                  price: asset.currentPrice,
-                  change: parseFloat(changePercent.toFixed(2)),
-               };
-            });
-            setHoldings(reformatHoldings);
+   const fetchPortfolio = async () => {
+      try {
+         const response = await api.post("api/portfolio/profile", { id: id });
+         const { assets, name, totalBalance, previousBalance } = response.data;
 
-            const assetsValue = assets.reduce((total: number, asset: any) => total + asset.currentValue, 0);
-            const totalBalance = assetsValue + cashBalance;
-            const oldBalance = assets.reduce((total: number, asset: any) => total + asset.avgPrice * asset.quantity, 0);
-            const changePercent = oldBalance > 0 ? ((totalBalance - oldBalance) / oldBalance * 100) : 0;
-            setBalance({
-               total: totalBalance,
+         const reformatHoldings = assets.map((asset: any) => {
+            const changePercent = asset.avgPrice > 0 ? ((asset.currentPrice - asset.avgPrice) / asset.avgPrice * 100) : 0;
+            return {
+               symbol: asset.symbol,
+               name: asset.symbol,
+               shares: asset.quantity,
+               price: asset.currentPrice,
                change: parseFloat(changePercent.toFixed(2)),
-            });
-         } catch (error) {
-            console.error("Failed to fetch portfolio: ", error);
-         }
-      };
+            };
+         });
+         setHoldings(reformatHoldings);
+
+         // const assetsValue = assets.reduce((total: number, asset: any) => total + asset.currentValue, 0);
+         // const totalBalance = assetsValue + cashBalance;
+         // const oldBalance = assets.reduce((total: number, asset: any) => total + asset.avgPrice * asset.quantity, 0);
+         const changePercent = previousBalance > 0 ? ((totalBalance - previousBalance) / previousBalance * 100) : 0;
+         setBalance({
+            total: totalBalance,
+            change: parseFloat(changePercent.toFixed(2)),
+         });
+      } catch (error) {
+         console.error("Failed to fetch portfolio: ", error);
+      }
+   };
+
+   useEffect(() => {
       fetchPortfolio();
-   }, [])
+   }, []);
 
    // Chart Data Preparation
    const chartData = {
@@ -142,23 +150,51 @@ export default function PortfolioPage() {
                               </div>
                               <div>
                                  <p className="font-bold group-hover:text-blue-400 transition-colors">{stock.symbol}</p>
-                                 <p className="text-xs text-gray-400">{stock.shares} Shares</p>
+                                 <p className="text-xs text-gray-400">{stock.shares} Share(s)</p>
                               </div>
                            </div>
-                           <div className="text-right">
-                              <p className="font-bold">${stock.price}</p>
-                              <p className={`text-xs ${stock.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                 {stock.change >= 0 ? '+' : ''}{stock.change}%
-                              </p>
+                           <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                 <p className="font-bold">${stock.price}</p>
+                                 <p className={`text-xs ${stock.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    {stock.change >= 0 ? '+' : ''}{stock.change}%
+                                 </p>
+                              </div>
+                              <button
+                                 className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/20 rounded-full text-red-500 transition-all flex items-center justify-center border border-transparent hover:border-red-500/30"
+                                 title="Delete Asset"
+                                 onClick={async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    await api.post("/api/portfolio/sell", {
+                                       symbol: stock.symbol,
+                                       quantity: stock.shares,
+                                       id: id
+                                    })
+                                    fetchPortfolio();
+                                 }
+                                 }
+                              >
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h14" />
+                                 </svg>
+                              </button>
                            </div>
                         </div>
                      ))}
                   </div>
-                  <Link href="/add-asset">
-                     <button className="w-full mt-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl transition-all font-semibold">
-                        + Add Asset
-                     </button>
-                  </Link>
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                     <Link href={`/add-asset?id=${id}`} className="w-full">
+                        <button className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl transition-all font-semibold">
+                           + Add
+                        </button>
+                     </Link>
+                     <Link href={`/sell-asset?id=${id}`} className="w-full">
+                        <button className="w-full py-3 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-500 rounded-xl transition-all font-semibold">
+                           - Sell
+                        </button>
+                     </Link>
+                  </div>
                </div>
             </div>
 

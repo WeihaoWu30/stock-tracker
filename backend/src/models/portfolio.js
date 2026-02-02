@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const portfolioSchema = new mongoose.Schema({
-   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+   name: { type: String, required: true },
    assets: [
       {
          symbol: { type: String, required: true },
@@ -9,7 +10,8 @@ const portfolioSchema = new mongoose.Schema({
          avgPrice: { type: Number, required: true },
       }
    ],
-   cashBalance: { type: Number, default: 0 }
+   totalBalance: { type: Number, default: 0 },
+   previousBalance: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Portfolio', portfolioSchema);

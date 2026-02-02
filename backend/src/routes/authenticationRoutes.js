@@ -1,6 +1,6 @@
 const express = require('express');
 const passport = require('passport');
-const { loginSuccess, loginFailure, getUserProfile } = require('../controllers/authentication');
+const { loginSuccess, loginFailure, getUserProfile, logout } = require('../controllers/authentication');
 const checkAuth = require('../middleware/authenticationMiddleware.js');
 const user = require('../models/user.js');
 
@@ -19,7 +19,8 @@ router.use(checkAuth);
 
 router.get("/success", loginSuccess);
 router.get("/failure", loginFailure);
-router.get("/user", getUserProfile)
+router.get("/user", getUserProfile);
+router.get("/logout", logout)
 
 
 

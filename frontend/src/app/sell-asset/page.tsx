@@ -5,14 +5,13 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import api from "@/utils/api";
 
-export default function AddAssetPage() {
+export default function SellAssetPage() {
    const searchParams = useSearchParams();
    const id = searchParams.get("id");
    const router = useRouter();
    const [formData, setFormData] = useState({
       symbol: "",
       quantity: "",
-      price: "",
    });
    const [error, setError] = useState("");
    const [loading, setLoading] = useState(false);
@@ -47,16 +46,14 @@ export default function AddAssetPage() {
       setError("");
 
       try {
-         // const response = await api.get("api/portfolio/price", { params: { symbol: formData.symbol } });
-         // const { price } = response.data;
-         await api.post("/api/portfolio/buy", {
+         await api.post("/api/portfolio/sell", {
             symbol: formData.symbol.toUpperCase(),
-            quantity: formData.quantity,
+            quantity: Number(formData.quantity),
             id: id
          });
          router.push(`/portfolio/${id}`);
-      } catch (error) {
-         setError("Failed to add asset");
+      } catch (err: any) {
+         setError(err.response?.data?.message || "Failed to sell asset");
          setLoading(false);
       }
    };
@@ -64,10 +61,10 @@ export default function AddAssetPage() {
    return (
       <div className="min-h-screen p-6 pt-24 font-sans bg-black/5 dark:bg-black text-foreground">
          <div className="max-w-md mx-auto animate-slide-up">
-            <div className="glass-card p-8 rounded-2xl">
+            <div className="glass-card p-8 rounded-2xl border-red-500/10">
                <header className="mb-8 text-center">
-                  <h1 className="text-3xl font-bold mb-2 text-gradient">Add New Asset</h1>
-                  <p className="text-secondary">Track a new stock in your portfolio</p>
+                  <h1 className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-600">Sell Asset</h1>
+                  <p className="text-secondary">Reduce your position or exit a trade</p>
                </header>
 
                <form onSubmit={handleSubmit} className="space-y-6">
@@ -83,7 +80,7 @@ export default function AddAssetPage() {
                         type="text"
                         required
                         placeholder="e.g., AAPL"
-                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none"
                         value={formData.symbol}
                         onChange={(e) => {
                            setFormData({ ...formData, symbol: e.target.value });
@@ -96,8 +93,8 @@ export default function AddAssetPage() {
                            {query.map((q: any, index: number) => (
                               <li
                                  key={index}
-                                 className="p-3 hover:bg-blue-600/20 cursor-pointer transition-colors border-b border-white/5 last:border-0"
-                                 onClick={(e) => {
+                                 className="p-3 hover:bg-red-600/20 cursor-pointer transition-colors border-b border-white/5 last:border-0"
+                                 onMouseDown={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     setFormData(prev => ({ ...prev, symbol: q.qSymbol }));
@@ -105,7 +102,7 @@ export default function AddAssetPage() {
                                     setQuery([]);
                                  }}
                               >
-                                 <div className="font-bold text-blue-400">{q.qSymbol}</div>
+                                 <div className="font-bold text-red-400">{q.qSymbol}</div>
                                  <div className="text-xs text-secondary truncate">{q.qName}</div>
                               </li>
                            ))}
@@ -121,32 +118,18 @@ export default function AddAssetPage() {
                         min="0.0001"
                         step="any"
                         placeholder="0.00"
-                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none"
                         value={formData.quantity}
                         onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                      />
                   </div>
 
-                  {/* <div className="space-y-2">
-                     <label className="text-sm font-medium text-secondary">Buy Price ($)</label>
-                     <input
-                        type="number"
-                        required
-                        min="0.01"
-                        step="0.01"
-                        placeholder="0.00"
-                        className="w-full p-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                     />
-                  </div> */}
-
                   <button
                      type="submit"
                      disabled={loading}
-                     className="w-full py-4 mt-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                     className="w-full py-4 mt-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-xl font-bold shadow-lg shadow-red-500/20 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                     {loading ? "Adding..." : "Add to Portfolio"}
+                     {loading ? "Selling..." : "Sell from Portfolio"}
                   </button>
                </form>
             </div>

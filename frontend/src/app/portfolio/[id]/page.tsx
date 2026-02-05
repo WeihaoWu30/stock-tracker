@@ -27,9 +27,21 @@ export default function PortfolioPage() {
    const [balance, setBalance] = useState({ total: 0, change: 0 });
 
    const [holdings, setHoldings] = useState<Holding[]>([]);
+   const [portfolioName, setPortfolioName] = useState("");
+   const [loading, setLoading] = useState(true);
+   const [chartData, setChartData] = useState<any>(null);
 
    const params = useParams();
    const id = params.id as string;
+
+   const fetchHistory = async (h: Holding[]) => {
+      if (h.length == 0) return;
+      try {
+
+      } catch (error) {
+
+      }
+   };
 
    const fetchPortfolio = async () => {
       try {
@@ -66,18 +78,18 @@ export default function PortfolioPage() {
    }, []);
 
    // Chart Data Preparation
-   const chartData = {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      datasets: [
-         {
-            label: 'Portfolio Value',
-            data: [10000, 10500, 10200, 11000, 11800, 12500],
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.5)',
-            tension: 0.4
-         },
-      ],
-   };
+   // const chartData = {
+   //    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+   //    datasets: [
+   //       {
+   //          label: 'Portfolio Value',
+   //          data: [10000, 10500, 10200, 11000, 11800, 12500],
+   //          borderColor: 'rgb(75, 192, 192)',
+   //          backgroundColor: 'rgba(75, 192, 192, 0.5)',
+   //          tension: 0.4
+   //       },
+   //    ],
+   // };
 
    const allocationData = {
       labels: holdings.map(h => h.symbol),
@@ -124,7 +136,13 @@ export default function PortfolioPage() {
 
                {/* Main Chart */}
                <div className="h-[400px]">
-                  <StockChart type="line" data={chartData} title="Performance History" />
+                  {chartData ? (
+                     <StockChart type="line" data={chartData} title="Performance History (5 Years)" />
+                  ) : (
+                     <div className="h-full flex items-center justify-center glass-card rounded-xl">
+                        <p className="text-gray-400">Loading historical data...</p>
+                     </div>
+                  )}
                </div>
             </div>
 

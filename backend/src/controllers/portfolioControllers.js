@@ -152,9 +152,23 @@ const getUser = async (req, res) => {
 
 const getHistoricalData = async (req, res) => {
    try {
+      const { symbol } = req.body;
+      if (!req.user) return res.json(401).json({ message: "Unauthorized" });
+      const fetchHistoricalData = await axios.get('https://api.twelvedata.com/time_series', {
+         params: {
+            symbol: symbol,
+            interval: '1month',
+            outputsize: 60,
+            apikey: process.env.STOCK_API_KEY,
+         }
+      });
 
+      if (fetchHistoricalData.data.status == 'error') {
+         return res.status(400).json({ message: response.data.message });
+      }
+      res.json(fetchHistoricalData.data);
    } catch (error) {
-
+      res.status(500).json({ error: error.message });
    }
 }
 
@@ -302,5 +316,6 @@ module.exports = {
    addShares,
    sellShares,
    deleteAsset,
-   searchAsset
+   searchAsset,
+   getHistoricalData
 };

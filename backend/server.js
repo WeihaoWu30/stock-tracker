@@ -25,7 +25,7 @@ app.use(express.json());
 // see https://expressjs.com/en/guide/behind-proxies.html
 app.set('trust proxy', 1);
 
-const MongoStore = require('connect-mongo');
+const MongoStore = require('connect-mongo').default;
 
 app.use(session({
    secret: process.env.SESSION_SECRET,

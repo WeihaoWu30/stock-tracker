@@ -21,10 +21,19 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+// see https://expressjs.com/en/guide/behind-proxies.html
+app.set('trust proxy', 1);
+
 app.use(session({
    secret: process.env.SESSION_SECRET, // change to a strong secret in production
    resave: false,             // don't save session if unmodified
-   saveUninitialized: false   // don't create session until something stored
+   saveUninitialized: false,   // don't create session until something stored
+   cookie: {
+      secure: process.env.NODE_ENV === 'production', // true in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none for cross-site cookie
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+   }
 }));
 
 app.use(passport.initialize());

@@ -11,9 +11,11 @@ passport.use(
          clientID: process.env.GOOGLE_CLIENT_ID,
          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
          callbackURL: process.env.GOOGLE_CALLBACK_URL,
-         passReqToCallback: true
+         passReqToCallback: true,
+         proxy: true
       },
       async (req, accessToken, refreshToken, profile, done) => {
+         console.log("Google Auth Callback triggered for profile:", profile.id);
          try {
             let user = await User.findOne({ googleId: profile.id });
 

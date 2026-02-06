@@ -21,6 +21,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Request logger middleware for debugging
+app.use((req, res, next) => {
+   console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Auth: ${req.isAuthenticated()} - SessionID: ${req.sessionID}`);
+   next();
+});
+
 // Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
 // see https://expressjs.com/en/guide/behind-proxies.html
 app.set('trust proxy', 1);
@@ -58,5 +64,8 @@ const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
    console.log(`Backend running on port ${PORT}`);
+   console.log(`Environment: ${process.env.NODE_ENV}`);
+   console.log(`Client URL: ${process.env.CLIENT_URL}`);
+   console.log(`Google Callback: ${process.env.GOOGLE_CALLBACK_URL}`);
 });
 

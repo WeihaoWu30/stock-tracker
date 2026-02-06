@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import api from "@/utils/api";
 
-export default function SellAssetPage() {
+function SellAssetContent() {
    const searchParams = useSearchParams();
    const id = searchParams.get("id");
    const router = useRouter();
@@ -140,5 +140,13 @@ export default function SellAssetPage() {
             </div>
          </div>
       </div>
+   );
+}
+
+export default function SellAssetPage() {
+   return (
+      <Suspense fallback={<div className="min-h-screen pt-24 text-center text-white">Loading...</div>}>
+         <SellAssetContent />
+      </Suspense>
    );
 }

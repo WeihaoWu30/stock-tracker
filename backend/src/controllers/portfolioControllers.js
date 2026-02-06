@@ -1,6 +1,4 @@
 const Portfolio = require("../models/portfolio");
-const Stock = require("../models/stock");
-const User = require("../models/user");
 const axios = require("axios");
 
 // Helper: Get Current Price

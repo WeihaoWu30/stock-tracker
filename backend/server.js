@@ -25,14 +25,20 @@ app.use(express.json());
 // see https://expressjs.com/en/guide/behind-proxies.html
 app.set('trust proxy', 1);
 
+const MongoStore = require('connect-mongo');
+
 app.use(session({
-   secret: process.env.SESSION_SECRET, // change to a strong secret in production
-   resave: false,             // don't save session if unmodified
-   saveUninitialized: false,   // don't create session until something stored
+   secret: process.env.SESSION_SECRET,
+   resave: false,
+   saveUninitialized: false,
+   store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: 'sessions'
+   }),
    cookie: {
-      secure: process.env.NODE_ENV === 'production', // true in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none for cross-site cookie
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000
    }
 }));
 

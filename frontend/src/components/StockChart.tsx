@@ -9,7 +9,8 @@ import {
    Title,
    Tooltip,
    Legend,
-   ArcElement
+   ArcElement,
+   ChartData
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 
@@ -26,7 +27,7 @@ ChartJS.register(
 
 interface StockChartProps {
    type?: 'line' | 'doughnut';
-   data: any;
+   data: ChartData<'line' | 'doughnut'>;
    title?: string;
 }
 
@@ -60,7 +61,7 @@ export default function StockChart({ type = 'line', data, title }: StockChartPro
 
    return (
       <div className="glass-card p-4 rounded-xl w-full h-full min-h-[300px] flex items-center justify-center">
-         {type === 'line' ? <Line options={options} data={data} /> : <Doughnut options={options} data={data} />}
+         {type === 'line' ? <Line options={options} data={data as ChartData<'line'>} /> : <Doughnut options={options} data={data as ChartData<'doughnut'>} />}
       </div>
    );
 }

@@ -2,34 +2,47 @@
 
 import { useState, useEffect } from 'react';
 import StockChart from '@/components/StockChart';
-import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import api from '@/utils/api';
 import Link from 'next/link';
 
 
+import { ChartData } from 'chart.js';
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+type Holding = {
+   symbol: string,
+   name: string,
+   shares: number,
+   price: number,
+   change: number
+};
+
+type HistoricalPoint = {
+   datetime: string;
+   open: string;
+   high: string;
+   low: string;
+   close: string;
+   volume: string;
+};
+
+type BackendAsset = {
+   symbol: string;
+   quantity: number;
+   avgPrice: number;
+   currentPrice: number;
+};
+
 export default function PortfolioPage() {
-
-   const router = useRouter();
-
-   type Holding = {
-      symbol: string,
-      name: string,
-      shares: number,
-      price: number,
-      change: number
-   };
 
    // Mock Data (simulating API response)
    const [balance, setBalance] = useState({ total: 0, change: 0 });
 
    const [holdings, setHoldings] = useState<Holding[]>([]);
-   const [portfolioName, setPortfolioName] = useState("");
-   const [loading, setLoading] = useState(true);
-   const [chartData, setChartData] = useState<any>(null);
+   const [chartData, setChartData] = useState<ChartData<'line'> | null>(null);
 
    const params = useParams();
    const id = params.id as string;
@@ -50,7 +63,8 @@ export default function PortfolioPage() {
             const stock = holdings.find(h => h.symbol === symbol);
             const quantity = stock ? stock.shares : 0;
 
-            data.forEach((point: any) => {
+            // Type assertion for data array items
+            (data as HistoricalPoint[]).forEach((point) => {
                const date = point.datetime;
                const price = parseFloat(point.close);
 
@@ -60,7 +74,7 @@ export default function PortfolioPage() {
          });
 
          const sortedDates = Array.from(dataMap.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-         const dataPoints = sortedDates.map(d => dataMap.get(d));
+         const dataPoints = sortedDates.map(d => dataMap.get(d) || 0);
 
          setChartData({
             labels: sortedDates,
@@ -85,7 +99,7 @@ export default function PortfolioPage() {
          const response = await api.post("api/portfolio/profile", { id: id });
          const { assets, name, totalBalance, previousBalance } = response.data;
 
-         const reformatHoldings = assets.map((asset: any) => {
+         const reformatHoldings = assets.map((asset: BackendAsset) => {
             const changePercent = asset.avgPrice > 0 ? ((asset.currentPrice - asset.avgPrice) / asset.avgPrice * 100) : 0;
             return {
                symbol: asset.symbol,

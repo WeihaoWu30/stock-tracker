@@ -19,6 +19,11 @@ export default function AddAssetPage() {
    const [query, setQuery] = useState([]);
    const [showDropdown, setDropdown] = useState(false);
 
+   interface QueryMatch {
+      qSymbol: string;
+      qName: string;
+   }
+
    useEffect(() => {
       if (!formData.symbol || formData.symbol.length < 1) {
          setQuery([]);
@@ -56,6 +61,7 @@ export default function AddAssetPage() {
          });
          router.push(`/portfolio/${id}`);
       } catch (error) {
+         console.log(error);
          setError("Failed to add asset");
          setLoading(false);
       }
@@ -93,7 +99,7 @@ export default function AddAssetPage() {
                      />
                      {showDropdown && query.length > 0 && (
                         <ul className="absolute z-10 w-full mt-1 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
-                           {query.map((q: any, index: number) => (
+                           {query.map((q: QueryMatch, index: number) => (
                               <li
                                  key={index}
                                  className="p-3 hover:bg-blue-600/20 cursor-pointer transition-colors border-b border-white/5 last:border-0"

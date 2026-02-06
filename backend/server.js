@@ -21,14 +21,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Request logger middleware for debugging
-app.use((req, res, next) => {
-   console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Auth: ${req.isAuthenticated()} - SessionID: ${req.sessionID}`);
-   next();
-});
 
-// Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-// see https://expressjs.com/en/guide/behind-proxies.html
+
+
 app.set('trust proxy', 1);
 
 const MongoStore = require('connect-mongo').default;
@@ -50,6 +45,13 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Request logger middleware for debugging
+app.use((req, res, next) => {
+   const isAuth = typeof req.isAuthenticated === 'function' ? req.isAuthenticated() : false;
+   console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Auth: ${isAuth} - SessionID: ${req.sessionID}`);
+   next();
+});
 
 
 app.get('/', (req, res) => {

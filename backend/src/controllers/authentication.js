@@ -1,26 +1,6 @@
 const User = require("../models/user");
 
 
-// const register = async(req, username, password) =>{
-//     if (!username && !password){
-//         return{
-//             "status": 401,
-//             "message": "Invalid",
-//         }
-//     }
-
-//     const user = await User.findOne({
-//         username: username,
-//     });
-
-//     if (user){
-//         return {
-//             "message": "Username is already used."
-//         }
-//     }
-
-
-// }
 
 const loginSuccess = (req, res) => {
    if (!req.user) {

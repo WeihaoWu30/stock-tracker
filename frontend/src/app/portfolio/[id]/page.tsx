@@ -34,12 +34,49 @@ export default function PortfolioPage() {
    const params = useParams();
    const id = params.id as string;
 
-   const fetchHistory = async (h: Holding[]) => {
-      if (h.length == 0) return;
+   const fetchHistory = async (holdings: Holding[]) => {
+      if (holdings.length == 0) return;
       try {
+         const getHistories = holdings.map(h => api.post("/api/portfolio/history", { symbol: h.symbol })
+            .then(res => ({ symbol: h.symbol, data: res.data.values || [] })).catch(err => {
+               console.error(err);
+               return { symbol: h.symbol, data: [] }
+            }));
 
+         const histories = await Promise.all(getHistories);
+         const dataMap = new Map<string, number>();
+
+         histories.forEach(({ symbol, data }) => {
+            const stock = holdings.find(h => h.symbol === symbol);
+            const quantity = stock ? stock.shares : 0;
+
+            data.forEach((point: any) => {
+               const date = point.datetime;
+               const price = parseFloat(point.close);
+
+               const val = price * quantity;
+               dataMap.set(date, (dataMap.get(date) || 0) + val);
+            });
+         });
+
+         const sortedDates = Array.from(dataMap.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+         const dataPoints = sortedDates.map(d => dataMap.get(d));
+
+         setChartData({
+            labels: sortedDates,
+            datasets: [
+               {
+                  label: 'Portfolio Value',
+                  data: dataPoints,
+                  borderColor: 'rgb(75, 192, 192)',
+                  backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                  tension: 0.4,
+                  fill: true
+               },
+            ],
+         });
       } catch (error) {
-
+         console.error(error);
       }
    };
 
@@ -59,10 +96,8 @@ export default function PortfolioPage() {
             };
          });
          setHoldings(reformatHoldings);
+         fetchHistory(reformatHoldings);
 
-         // const assetsValue = assets.reduce((total: number, asset: any) => total + asset.currentValue, 0);
-         // const totalBalance = assetsValue + cashBalance;
-         // const oldBalance = assets.reduce((total: number, asset: any) => total + asset.avgPrice * asset.quantity, 0);
          const changePercent = previousBalance > 0 ? ((totalBalance - previousBalance) / previousBalance * 100) : 0;
          setBalance({
             total: totalBalance,
@@ -76,20 +111,6 @@ export default function PortfolioPage() {
    useEffect(() => {
       fetchPortfolio();
    }, []);
-
-   // Chart Data Preparation
-   // const chartData = {
-   //    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-   //    datasets: [
-   //       {
-   //          label: 'Portfolio Value',
-   //          data: [10000, 10500, 10200, 11000, 11800, 12500],
-   //          borderColor: 'rgb(75, 192, 192)',
-   //          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-   //          tension: 0.4
-   //       },
-   //    ],
-   // };
 
    const allocationData = {
       labels: holdings.map(h => h.symbol),

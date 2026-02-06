@@ -153,7 +153,10 @@ const getUser = async (req, res) => {
 const getHistoricalData = async (req, res) => {
    try {
       const { symbol } = req.body;
-      if (!req.user) return res.json(401).json({ message: "Unauthorized" });
+      if (!symbol) return res.status(400).json({ message: "Symbol is required" });
+
+      if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+
       const fetchHistoricalData = await axios.get('https://api.twelvedata.com/time_series', {
          params: {
             symbol: symbol,
@@ -164,10 +167,11 @@ const getHistoricalData = async (req, res) => {
       });
 
       if (fetchHistoricalData.data.status == 'error') {
-         return res.status(400).json({ message: response.data.message });
+         return res.status(400).json({ message: fetchHistoricalData.data.message });
       }
       res.json(fetchHistoricalData.data);
    } catch (error) {
+      console.error("Historical Data Error:", error);
       res.status(500).json({ error: error.message });
    }
 }
@@ -184,12 +188,6 @@ const addShares = async (req, res) => {
       const userId = req.user._id;
 
       let portfolio = await Portfolio.findOne({ _id: id, user: userId });
-      // if (!portfolio) {
-      //    portfolio = new Portfolio({ user: userId, assets: [] });
-      // }
-
-      // Check if user has enough cash (logic omitted for now, implies totalBalance check)
-
       // Find if asset exists
       const assetIndex = portfolio.assets.findIndex(a => a.symbol === symbol);
 
@@ -203,6 +201,8 @@ const addShares = async (req, res) => {
          portfolio.totalBalance += quantity * asset.avgPrice;
       } else {
          // Add new asset
+         portfolio.previousBalance = portfolio.totalBalance;
+         portfolio.totalBalance += quantity * price;
          portfolio.assets.push({ symbol, quantity, avgPrice: price });
       }
 
@@ -235,8 +235,6 @@ const sellShares = async (req, res) => {
             asset.quantity -= quantity;
             portfolio.previousBalance = portfolio.totalBalance;
             portfolio.totalBalance -= quantity * currentPrice;
-
-            // Add cash logic here: portfolio.totalBalance += quantity * price;
 
             if (asset.quantity === 0) {
                portfolio.assets.splice(assetIndex, 1); // Remove if 0
@@ -287,7 +285,6 @@ const searchAsset = async (req, res) => {
          }
       });
 
-      // TwelveData search returns { data: [...] }
       const matches = response.data.data || [];
 
       const queryResults = matches.map((r) => {

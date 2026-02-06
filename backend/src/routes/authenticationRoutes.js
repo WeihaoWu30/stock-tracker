@@ -20,7 +20,7 @@ router.use(checkAuth);
 router.get("/success", loginSuccess);
 router.get("/failure", loginFailure);
 router.get("/user", getUserProfile);
-router.get("/logout", logout)
+router.post("/logout", logout)
 
 
 

@@ -6,8 +6,6 @@ const userSchema = new mongoose.Schema({
    // Stocks and Balance moved to Portfolio model
    email: {
       type: String,
-      //required: true,
-      //unique: true,
    },
    username: {
       type: String,
@@ -16,8 +14,6 @@ const userSchema = new mongoose.Schema({
    },
    password: {
       type: String,
-      //   required: true,
-      //unique: true,
    },
    googleId: {
       type: String,
